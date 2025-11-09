@@ -57,6 +57,17 @@ class SecurityPolicyProxy:  # pylint: disable=too-few-public-methods
 
     def __init__(self):
         script_directory = os.path.dirname(os.path.realpath(__file__))
+
+        # Check for custom binary path via environment variable
+        env_var_name = 'AZ_EXT_CONFCOM_DMVERITY_BINARY'
+        custom_binary = os.environ.get(env_var_name)
+        if custom_binary:
+            if not os.path.exists(custom_binary) or not os.access(custom_binary, os.X_OK):
+                eprint(f"Ensure custom dmverity binary exists and is executable: {custom_binary}")
+            self.policy_bin = custom_binary
+            logger.info(f"Using custom dmverity binary from {env_var_name}: {custom_binary}")
+            return
+
         DEFAULT_LIB = "./bin/dmverity-vhd"
 
         if host_os == "Linux":
